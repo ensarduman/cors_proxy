@@ -28,12 +28,13 @@ def proxy(path):
         )
 
         return Response(
-            str(response.status_code),  # Only return HTTP status code
-            status=200
+            response.content,  # Forward the original response content
+            status=response.status_code,  # Use the same HTTP status code as the original response
+            headers=dict(response.headers)  # Forward the original response headers
         )
 
     except requests.exceptions.RequestException as e:
-        return Response("500", status=500)
+        return Response("An error occurred", status=500)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8989)
