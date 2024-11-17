@@ -13,7 +13,8 @@ def proxy(path):
         return Response("Missing 'url' parameter", status=400)
 
     try:
-        headers = {key: value for key, value in request.headers if key != 'Host'}
+        headers = {key: value for key, value in request.headers if key.lower() != 'host'}
+        headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         method = request.method
         data = request.get_data()
 
@@ -22,17 +23,17 @@ def proxy(path):
             url=target_url,
             headers=headers,
             data=data,
-            params=request.args
+            params=request.args,
+            stream=False  # Disable streaming
         )
 
         return Response(
-            response.content,
-            status=response.status_code,
-            headers=dict(response.headers)
+            str(response.status_code),  # Only return HTTP status code
+            status=200
         )
 
     except requests.exceptions.RequestException as e:
-        return Response(str(e), status=500)
+        return Response("500", status=500)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8989)
